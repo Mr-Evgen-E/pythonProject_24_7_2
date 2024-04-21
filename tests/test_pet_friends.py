@@ -1,17 +1,18 @@
 from api import PetFriends
-from settings import valid_email, valid_password
+from settings import valid_email, valid_password, not_valid_email, not_valid_password, empty_email, empty_password
 import os
 
 pf = PetFriends()
 
 
 def test_get_api_key_for_valid_user(email=valid_email, password=valid_password):
-    """ Проверяем что запрос api ключа. Возвращает статус 200 и в результате содержится слово key"""
+    """ Проверяем что запрос api ключа возвращает статус 200 и в результате содержится слово key"""
 
     # Отправляем запрос и сохраняем полученный ответ с кодом статуса в status, а текст ответа в result
     status, result = pf.get_api_key(email, password)
 
     # Сверяем полученные данные с нашими ожиданиями
+    print(result)
     assert status == 200
     assert 'key' in result
 
@@ -72,7 +73,8 @@ def test_successful_delete_self_pet():
 
 
 def test_successful_update_self_pet_info(name='Змий', animal_type='Змея', age=1):
-    """Проверяем возможность обновления информации о питомце"""
+    """Проверяем возможность обновления информации о питомце. Должен быть добавлен хотя бы
+    один питомец"""
 
     # Получаем ключ auth_key и список своих питомцев
     _, auth_key = pf.get_api_key(valid_email, valid_password)
@@ -125,3 +127,66 @@ def test_successful_add_pet_photo(pet_photo='images/cat1.jpg'):
     else:
         # если спиок питомцев пустой, то выкидываем исключение с текстом об отсутствии своих питомцев
         raise Exception("There is no my pets")
+
+
+# Дополнительные 10 тестов домашнего задания 24.7.2
+
+# Негативные тесты PASSED, когда соблюдаются условия, что сервер выдал ошибки логина пользователя.
+
+#1
+def test_get_api_key_for_not_valid_email(email=not_valid_email, password=valid_password):
+    """ Проверяем что запрос api ключа возвращает статус 403 при неверном е-майл и верном пароле.
+    А также отсутствуют данные ключа в ответе"""
+
+    # Отправляем запрос и сохраняем полученный ответ с кодом статуса в status, а текст ответа в result
+    status, result = pf.get_api_key(email, password)
+
+    # Сверяем полученные данные с нашими ожиданиями
+    assert status == 403
+    assert 'key' not in result
+
+#2
+def test_get_api_key_for_not_valid_password(email=valid_email, password=not_valid_password):
+    """ Проверяем что запрос api ключа возвращает статус 403 при верном е-майл и неверном пароле.
+    А также отсутствуют данные ключа в ответе"""
+
+    # Отправляем запрос и сохраняем полученный ответ с кодом статуса в status, а текст ответа в result
+    status, result = pf.get_api_key(email, password)
+
+    # Сверяем полученные данные с нашими ожиданиями
+    assert status == 403
+    assert 'key' not in result
+
+#3
+def test_get_api_key_for_empty_password(email=valid_email, password=empty_password):
+    """ Проверяем что запрос api ключа возвращает статус 403 при верном е-майл и пустом пароле.
+    А также отсутствуют данные ключа в ответе"""
+
+    # Отправляем запрос и сохраняем полученный ответ с кодом статуса в status, а текст ответа в result
+    status, result = pf.get_api_key(email, password)
+
+    # Сверяем полученные данные с нашими ожиданиями
+    assert status == 403
+    assert 'key' not in result
+
+#4
+def test_get_api_key_for_empty_email(email=empty_email, password=valid_password):
+    """ Проверяем что запрос api ключа возвращает статус 403 при пустом е-майл и правильном пароле.
+    А также отсутствуют данные ключа в ответе"""
+
+    # Отправляем запрос и сохраняем полученный ответ с кодом статуса в status, а текст ответа в result
+    status, result = pf.get_api_key(email, password)
+
+    # Сверяем полученные данные с нашими ожиданиями
+    assert status == 403
+    assert 'key' not in result
+
+#5
+def test_get_all_pets_with_not_valid_key(filter=''):
+    """ Проверяем что запрос всех питомцев с неправильным ключом возвращает ответ сервера 403"""
+
+    auth_key = {'key': '11992166c0dcac116eb41f1f46076fadb60530f4568b82603b2244ee1'}
+    status, result = pf.get_list_of_pets(auth_key, filter)
+
+    assert status == 403
+ #   assert len(result['pets']) > 0
