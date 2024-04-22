@@ -46,6 +46,26 @@ def test_add_new_pet_with_valid_data(name='Тиха', animal_type='Енот',
     assert result['name'] == name
 
 
+def test_successful_update_self_pet_info(name='Змий', animal_type='Змея', age=1):
+    """Проверяем возможность обновления информации о питомце. Должен быть добавлен хотя бы
+    один питомец"""
+
+    # Получаем ключ auth_key и список своих питомцев
+    _, auth_key = pf.get_api_key(valid_email, valid_password)
+    _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")
+
+    # Если список не пустой, то пробуем обновить его имя, тип и возраст
+    if len(my_pets['pets']) > 0:
+        status, result = pf.update_pet_info(auth_key, my_pets['pets'][0]['id'], name, animal_type, age)
+
+        # Проверяем что статус ответа = 200 и имя питомца соответствует заданному
+        assert status == 200
+        assert result['name'] == name
+    else:
+        # если список питомцев пустой, то выкидываем исключение с текстом об отсутствии своих питомцев
+        raise Exception("There is no my pets")
+
+
 def test_successful_delete_self_pet():
     """Проверяем возможность удаления питомца"""
 
@@ -68,26 +88,6 @@ def test_successful_delete_self_pet():
     # Проверяем что статус ответа равен 200 и в списке питомцев нет id удалённого питомца
     assert status == 200
     assert pet_id not in my_pets.values()
-
-
-def test_successful_update_self_pet_info(name='Змий', animal_type='Змея', age=1):
-    """Проверяем возможность обновления информации о питомце. Должен быть добавлен хотя бы
-    один питомец"""
-
-    # Получаем ключ auth_key и список своих питомцев
-    _, auth_key = pf.get_api_key(valid_email, valid_password)
-    _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")
-
-    # Если список не пустой, то пробуем обновить его имя, тип и возраст
-    if len(my_pets['pets']) > 0:
-        status, result = pf.update_pet_info(auth_key, my_pets['pets'][0]['id'], name, animal_type, age)
-
-        # Проверяем что статус ответа = 200 и имя питомца соответствует заданному
-        assert status == 200
-        assert result['name'] == name
-    else:
-        # если список питомцев пустой, то выкидываем исключение с текстом об отсутствии своих питомцев
-        raise Exception("There is no my pets")
 
 
 # Реализация дополнительных двух методов курса обучения
